@@ -1,0 +1,6 @@
+torch
+torchvision
+pandas
+numpy
+tqdm
+pickle5  # Only if you're using pickle5 for backward compatibility
