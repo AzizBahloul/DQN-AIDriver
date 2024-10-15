@@ -17,7 +17,7 @@ class RaceTrackEnv(gym.Env):
 
         # Load car image
         self.car_img = pygame.image.load('assets/car.jpg')
-        self.car_img = pygame.transform.scale(self.car_img, (30, 15))
+        self.car_img = pygame.transform.scale(self.car_img, (50, 35))
 
         # Track properties
         self.track_width = 60
@@ -62,9 +62,9 @@ class RaceTrackEnv(gym.Env):
         elif action == 2:  # right
             self.car_angle += 5
         elif action == 3:  # accelerate
-            self.car_speed = min(self.car_speed + 2, self.max_speed)  # Faster acceleration
+            self.car_speed = min(self.car_speed + 5 , self.max_speed)  # Faster acceleration
         elif action == 4:  # brake
-            self.car_speed = max(self.car_speed - 0.4, 0)  # Faster braking
+            self.car_speed = max(self.car_speed - 0.2, 0)  # Faster braking
 
         # Move car
         self.car_pos[0] += self.car_speed * np.cos(np.radians(self.car_angle))
@@ -97,18 +97,22 @@ class RaceTrackEnv(gym.Env):
         return np.array([self.car_pos[0], self.car_pos[1], self.car_angle, self.car_speed])
 
     def render(self, screen):
-        screen.fill((0, 100, 0))  # Green background
-        screen.blit(self.track, (0, 0))
+        race_track_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        race_track_surface.fill((0, 100, 0))  # Green background for the race track
+        race_track_surface.blit(self.track, (0, 0))
 
         # Draw start and end lines
-        pygame.draw.line(screen, (255, 0, 0), self.start_pos.astype(int), self.start_pos.astype(int) + np.array([30, 0]), 3)
-        pygame.draw.line(screen, (0, 0, 255), self.end_pos.astype(int), self.end_pos.astype(int) + np.array([30, 0]), 3)
+        pygame.draw.line(race_track_surface, (255, 0, 0), self.start_pos.astype(int), self.start_pos.astype(int) + np.array([30, 0]), 3)
+        pygame.draw.line(race_track_surface, (0, 0, 255), self.end_pos.astype(int), self.end_pos.astype(int) + np.array([30, 0]), 3)
 
         # Draw checkpoints
         for checkpoint in self.checkpoints:
-            pygame.draw.circle(screen, (255, 0, 0), checkpoint.astype(int), 5)
+            pygame.draw.circle(race_track_surface, (255, 0, 0), checkpoint.astype(int), 5)
 
         # Draw car
         rotated_car = pygame.transform.rotate(self.car_img, -self.car_angle)
         car_rect = rotated_car.get_rect(center=self.car_pos.astype(int))
-        screen.blit(rotated_car, car_rect.topleft)
+        race_track_surface.blit(rotated_car, car_rect.topleft)
+
+        # Blit the race track surface onto the main screen
+        screen.blit(race_track_surface, (0, 0))
